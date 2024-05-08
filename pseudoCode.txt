@@ -1,0 +1,310 @@
+class DataEntry {
+    private int key
+    private String value
+
+    constructor DataEntry(key, value):
+        this.key = key
+        this.value = value
+
+    method getKey():
+        return key
+
+    method setKey(key):
+        this.key = key
+
+    method getValue():
+        return value
+
+    method setValue(value):
+        this.value = value
+}
+
+class SPQList {
+    private String state = "MIN"
+    class Node {
+        Node parentNode
+        DataEntry dataEntry
+        Node leftNode
+        Node rightNode
+
+        constructor Node(parentNode, dataEntry, leftNode, rightNode):
+            this.parentNode = parentNode
+            this.dataEntry = dataEntry
+            this.leftNode = leftNode
+            this.rightNode = rightNode
+    }
+
+    class QueueNode {
+        Node node
+        QueueNode next
+
+        constructor QueueNode(node, next):
+            this.node = node
+            this.next = next
+    }
+
+    Node head
+    int size
+    QueueNode queueHead
+    QueueNode queueTail
+
+    constructor SPQList():
+        this.head = null
+        this.size = 0
+        this.queueHead = null
+        this.queueTail = null
+
+    method enQueue(node):
+        if queueHead == null:
+            queueHead = new QueueNode(node, null)
+            queueTail = queueHead
+        else:
+            queueTail.next = new QueueNode(node, null)
+            queueTail = queueTail.next
+
+    method deQueue():
+        temp = queueHead
+        queueHead = queueHead.next
+        temp.next = null
+        return temp.node
+
+    method lastParent():
+        enQueue(head)
+        temp = queueHead
+        while temp != null:
+            if temp.node.leftNode != null and temp.node.rightNode != null:
+                node = deQueue()
+                enQueue(node.leftNode)
+                enQueue(node.rightNode)
+                temp = queueHead
+            else:
+                queueHead = null
+                break
+        return temp.node
+
+    method lastNode():
+        enQueue(head)
+        temp = queueHead
+        node = null
+        while temp != null:
+            node = deQueue()
+            if temp.node.leftNode != null:
+                enQueue(node.leftNode)
+            if temp.node.rightNode != null:
+                enQueue(node.rightNode)
+            temp = queueHead
+        return node
+
+    method find(dataEntry):
+        enQueue(head)
+        temp = queueHead
+        while temp != null:
+            node = deQueue()
+            if node.dataEntry.getKey() == dataEntry.getKey() and node.dataEntry.getValue() == dataEntry.getValue():
+                return node
+            else:
+                if temp.node.leftNode != null:
+                    enQueue(node.leftNode)
+                if temp.node.rightNode != null:
+                    enQueue(node.rightNode)
+                temp = queueHead
+        return null
+
+    method upHeap(node):
+        compareKey = false
+        while node.parentNode != null:
+            if state.equals("MIN"):
+                compareKey = node.parentNode.dataEntry.getKey() > node.dataEntry.getKey()
+            else if state.equals("MAX"):
+                compareKey = node.parentNode.dataEntry.getKey() < node.dataEntry.getKey()
+
+            if not compareKey:
+                break
+
+            temp = node.dataEntry
+            node.dataEntry = node.parentNode.dataEntry
+            node.parentNode.dataEntry = temp
+            node = node.parentNode
+
+    method insert(key, value):
+        dataEntry = new DataEntry(key, value)
+        if head == null:
+            head = new Node(null, dataEntry, null, null)
+            size++
+        else:
+            lastParent = lastParent()
+            temp = null
+            if lastParent.leftNode == null:
+                lastParent.leftNode = new Node(lastParent, dataEntry, null, null)
+                temp = lastParent.leftNode
+            else if lastParent.rightNode == null:
+                lastParent.rightNode = new Node(lastParent, dataEntry, null, null)
+                temp = lastParent.rightNode
+            size++
+            upHeap(temp)
+
+    method downHeap(node):
+        compareKey = false
+        childKey = null
+        while node.rightNode != null or node.leftNode != null:
+            if node.rightNode == null:
+                childKey = node.leftNode
+            else if node.leftNode == null:
+                childKey = node.rightNode
+            else:
+                if state.equals("MIN"):
+                    childKey = node.leftNode.dataEntry.getKey() < node.rightNode.dataEntry.getKey() ? node.leftNode : node.rightNode
+                else if state.equals("MAX"):
+                    childKey = node.leftNode.dataEntry.getKey() > node.rightNode.dataEntry.getKey() ? node.leftNode : node.rightNode
+
+            if state.equals("MIN"):
+                compareKey = childKey.dataEntry.getKey() < node.dataEntry.getKey()
+            else:
+                compareKey = childKey.dataEntry.getKey() > node.dataEntry.getKey()
+
+            if not compareKey:
+                break
+
+            temp = node.dataEntry
+            node.dataEntry = childKey.dataEntry
+            childKey.dataEntry = temp
+            node = childKey
+
+    method removeTop():
+        if head == null:
+            print("Empty List")
+            return null
+        else:
+            temp = head.dataEntry
+            lastNode = lastNode()
+            head.dataEntry = lastNode.dataEntry
+            lastNode.dataEntry = temp
+            if lastNode.parentNode == null:
+                head = null
+                return temp
+            else if lastNode.parentNode.rightNode != null:
+                lastNode.parentNode.rightNode = null
+            else:
+                lastNode.parentNode.leftNode = null
+            lastNode.parentNode = null
+            downHeap(head)
+            size--
+            return temp
+
+    method remove(dataEntry):
+        if head == null:
+            print("Empty List")
+            return null
+        else:
+            entry = null
+            if find(dataEntry) != null:
+                entry = find(dataEntry)
+            else:
+                return null
+            lastNode = lastNode()
+            temp = entry.dataEntry
+            entry.dataEntry = lastNode.dataEntry
+            lastNode.dataEntry = temp
+            if lastNode.parentNode == null:
+                head = null
+                return temp
+            else if lastNode.parentNode.rightNode != null:
+                lastNode.parentNode.rightNode = null
+            else:
+                lastNode.parentNode.leftNode = null
+            lastNode.parentNode = null
+            upHeap(entry)
+            downHeap(entry)
+            size--
+            return temp
+
+    method replaceKey(dataEntry, keyToReplace):
+        if head == null:
+            print("Empty List")
+            return -1
+        else:
+            entry = null
+            if find(dataEntry) != null:
+                entry = find(dataEntry)
+            else:
+                return -1
+            key = entry.dataEntry.getKey()
+            entry.dataEntry.setKey(keyToReplace)
+            upHeap(entry)
+            downHeap(entry)
+            return key
+
+    method replaceValue(dataEntry, valueToReplace):
+        if head == null:
+            print("Empty List")
+            return null
+        else:
+            entry = null
+            if find(dataEntry) != null:
+                entry = find(dataEntry)
+            else:
+                return null
+            value = entry.dataEntry.getValue()
+            entry.dataEntry.setValue(valueToReplace)
+            return value
+
+    method toggle():
+        state = state.equals("MIN") ? "MAX" : "MIN"
+
+        if head != null:
+            reheapify(head)
+
+    method reheapify(node):
+        if node == null:
+            return
+        queueHead = null
+        enQueue(node)
+        temp = queueHead
+        while temp != null:
+            current = deQueue()
+            left = current.leftNode
+            while left != null:
+                enQueue(left)
+                left = left.leftNode
+            right = current.rightNode
+            while right != null:
+                enQueue(right)
+                right = right.rightNode
+            upHeap(current)
+            temp = queueHead
+
+    method top():
+        if head != null:
+            return head.dataEntry
+        else:
+            return null
+
+    method isEmpty():
+        return head == null
+
+    method getSize():
+        return size
+
+    method getState():
+        return state
+
+    method setState(state):
+        this.state = state
+
+    method displayHeap():
+        if head == null:
+            print("Empty List")
+            return
+        printHeap(head, 0)
+
+    method printHeap(node, space):
+        if node == null:
+            return
+        space += 10
+        printHeap(node.rightNode, space)
+        print()
+        for i in 10 to space:
+            print(" ")
+        print("(" + node.dataEntry.getKey() + "," + node.dataEntry.getValue() + ")")
+        printHeap(node.leftNode, space)
+}

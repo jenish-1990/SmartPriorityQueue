@@ -1,0 +1,29 @@
+1. toggle():
+   - This method toggles the state of the priority queue between min-heap and max-heap behaviour.
+   - It has a time complexity of O(n), where n is the number of nodes in the priority queue.
+   - This complexity arises from the `reheapify()` method called if the `head` of the queue is not null.
+
+2. remove(DataEntry dataEntry):
+   - This method removes a specific `DataEntry` object from the priority queue.
+   - The time complexity depends on the operations performed within the method:
+     - Finding the node to be removed (`find(dataEntry)`): O(n)
+     - Swapping the node to be removed with the last node: O(1)
+     - Updating parent and child references: O(1)
+     - Up-heap and down-heap operations: O(log n)
+   - Overall, the time complexity is O(n) due to the `find()` operation, but the dominant factor in the long run is the O(log n) for the heap operations.
+
+3. replaceKey(DataEntry dataEntry, int keyToReplace):
+   - This method replaces the key of a specific `DataEntry` object within the priority queue.
+   - Similar to `remove()`, its time complexity depends on:
+     - Finding the node to be updated (`find(dataEntry)`): O(n)
+     - Replacing the key and performing heap operations: O(log n)
+   - Thus, the overall time complexity is O(n) due to the `find()` operation, but the dominant factor is the O(log n) for heap operations.
+
+4. replaceValue(DataEntry dataEntry, String valueToReplace):
+   - This method replaces the value of a specific `DataEntry` object within the priority queue.
+   - Like `replaceKey()` and `remove()`, its time complexity is influenced by:
+     - Finding the node to be updated (`find(dataEntry)`): O(n)
+     - Replacing the value: O(1)
+   - Overall, the time complexity is O(n) due to the `find()` operation.
+
+Therefore, while the `find()` operation in `remove()`, `replaceKey()`, and `replaceValue()` contributes O(n) time complexity, the dominant factors in the long run are the O(log n) operations for heap operations such as up-heap and down-heap.
